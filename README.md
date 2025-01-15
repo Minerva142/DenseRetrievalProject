@@ -1,4 +1,4 @@
-## DenseRetrievalProject
+# DenseRetrievalProject
 
 Under [format_convertor directory](https://github.com/Minerva142/DenseRetrievalProject/tree/main/format_converter) , there are some python scripts to format data, formatted data is used by the **data_preparing_X.py** scripts which are under the [data_prepare_files](https://github.com/Minerva142/DenseRetrievalProject/tree/main/data_prepare_files) directory. These files provide the training and whole data for training parts.  
 
@@ -16,7 +16,7 @@ approaches number tagged with the number of approach(as suffix) to implementatio
 ## Faiss Index Implementations
 used faiss index are IP and L2 based, we retrieve 10 documents for each query while testing. 
 
-# Kaggle Implementations
+## Kaggle Implementations
 Other kaggle implementations can be found here:  
 
 https://www.kaggle.com/code/eraygnlal/llama-dense-retrieval-inference/edit  
@@ -24,3 +24,7 @@ https://www.kaggle.com/code/eraygnlal/llama-dense-retrieval-inference-trec-eval-
 
 // TODO FILL
 In there we are tried to use llama as encoder and we try to 
+
+## Demo
+
+Little [demo]() is provided.
