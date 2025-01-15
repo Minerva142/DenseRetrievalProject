@@ -3,11 +3,19 @@ import faiss
 import numpy as np
 from typing import List, Dict, Tuple
 from transformers import BertTokenizer
-from projectBertWithReRank import DenseRetrieverBERT, CrossAttentionReranker
+from projectBertWithReRank_2 import DenseRetrieverBERT, CrossAttentionReranker
 from tqdm import tqdm
 import json
+import pytrec_eval
+from data_preperar_for_faiss_and_validation import parse_files
+import os
 
-
+#TODO add load part of embeeding and faiss
+model_path = 'saved_models_for_with_rerank'
+path_of_emb = os.path.join(model_path, 'doc_embeddings_re_ranker.npy') # we can use them from standart embeedings
+path_of_faiss = os.path.join(model_path, 'doc_faiss_with_reranker.bin')
+use_already_exists_emb = False
+use_already_exists_faiss = False
 class DenseRetriever:
     def __init__(
             self,
@@ -19,6 +27,7 @@ class DenseRetriever:
     ):
         self.device = device
         self.tokenizer = BertTokenizer.from_pretrained(tokenizer_name)
+        self.documents = {}  # Store documents for retrieval
 
         # Load retriever
         self.retriever = DenseRetrieverBERT()
@@ -40,26 +49,32 @@ class DenseRetriever:
 
         self.doc_mapping = {}  # Maps Faiss index to document ID
 
-    def build_index(self, documents: List[Dict[str, str]], batch_size: int = 32):
+    def build_index(self, documents: Dict[str, str], batch_size: int = 32):
         """
         Build Faiss index from documents.
-        documents: List of dicts with 'id' and 'text' keys
+        documents: Dict with document IDs as keys and text as values
         """
+        # Store documents for later retrieval
+        self.documents = documents
+        
         # Initialize Faiss index
-        self.index = faiss.IndexFlatIP(self.dimension)  # Inner product index (for normalized vectors)
+        self.index = faiss.IndexFlatIP(self.dimension)
 
-        # Process documents in batches
-        for i in tqdm(range(0, len(documents), batch_size)):
-            batch_docs = documents[i:i + batch_size]
+        # Convert dict to list format for batch processing
+        doc_items = list(documents.items())
+        
+        for i in tqdm(range(0, len(doc_items), batch_size), desc="Building index"):
+            batch_docs = doc_items[i:i + batch_size]
 
             # Tokenize
             inputs = self.tokenizer(
-                [doc['text'] for doc in batch_docs],
+                [text for _, text in batch_docs],
                 padding=True,
                 truncation=True,
                 max_length=512,
                 return_tensors='pt'
             ).to(self.device)
+
 
             # Get embeddings
             with torch.no_grad():
@@ -72,8 +87,8 @@ class DenseRetriever:
             self.index.add(embeddings)
 
             # Update document mapping
-            for idx, doc in enumerate(batch_docs):
-                self.doc_mapping[i + idx] = doc['id']
+            for idx, (doc_id, _) in enumerate(batch_docs):
+                self.doc_mapping[i + idx] = doc_id
 
     def save_index(self, index_path: str, mapping_path: str = None):
         """Save Faiss index and document mapping"""
@@ -132,7 +147,7 @@ class DenseRetriever:
             rerank_scores = []
 
             for doc_id in doc_ids[:rerank_k]:
-                doc_text = self.get_document_by_id(doc_id)['text']
+                doc_text = self.documents[doc_id]
                 doc_inputs = self.tokenizer(
                     doc_text,
                     padding=True,
@@ -168,54 +183,75 @@ class DenseRetriever:
 
         return results
 
-    def get_document_by_id(self, doc_id: str) -> Dict:
+    def evaluate(self, queries: Dict[str, str], qrels: Dict[str, Dict[str, int]], k: int = 100, rerank_k: int = 10) -> Dict[str, float]:
         """
-        Implement this method based on your document storage system.
-        Should return a dict with at least 'id' and 'text' keys.
+        Evaluate retrieval performance using pytrec_eval
         """
-        raise NotImplementedError(
-            "Implement this method to retrieve document text by ID from your storage system"
+        # Prepare run dict for pytrec_eval
+        run = {}
+        
+        # Get retrievals for all queries
+        for qid, query in tqdm(queries.items(), desc="Evaluating queries"):
+            results = self.retrieve(query, k=k, rerank_k=rerank_k)
+            run[qid] = {result['id']: result['score'] for result in results}
+
+        # Initialize evaluator
+        evaluator = pytrec_eval.RelevanceEvaluator(
+            qrels, 
+            {'map', 'ndcg_cut.10', 'P.10', 'recall.100'}
         )
+        
+        # Calculate metrics
+        metrics = evaluator.evaluate(run)
+        
+        # Average metrics across queries
+        mean_metrics = {
+            'map': np.mean([q['map'] for q in metrics.values()]),
+            'ndcg@10': np.mean([q['ndcg_cut_10'] for q in metrics.values()]),
+            'P@10': np.mean([q['P_10'] for q in metrics.values()]),
+            'recall@100': np.mean([q['recall_100'] for q in metrics.values()])
+        }
+        
+        return mean_metrics
+
+    def get_document_by_id(self, doc_id: str) -> Dict:
+        """Return document by ID from the documents dictionary"""
+        return {'id': doc_id, 'text': self.documents.get(doc_id, '')}
 
 
-# Example usage
 def main():
     # Initialize retriever
     retriever = DenseRetriever(
-        retriever_path="multi_positive_retriever.pt",
-        reranker_path="multi_positive_reranker.pt"
+        retriever_path=os.path.join(model_path, "multi_positive_rerank_retriever.pt"),
+        reranker_path=os.path.join(model_path, "multi_positive_reranker.pt")
     )
 
-    # Example documents
-    documents = [
-        {
-            'id': '1',
-            'text': 'Machine learning is a subset of artificial intelligence'
-        },
-        {
-            'id': '2',
-            'text': 'Deep learning uses neural networks with multiple layers'
-        },
-        # Add more documents...
-    ]
+    queries, documents, qrels = parse_files()
 
     # Build and save index
     retriever.build_index(documents)
     retriever.save_index(
-        index_path="retriever_index.faiss",
+        index_path=path_of_faiss,
         mapping_path="doc_mapping.json"
     )
 
-    # Example query
+    # Evaluate
+    metrics = retriever.evaluate(queries, qrels)
+    print("\nEvaluation Metrics:")
+    for metric, value in metrics.items():
+        print(f"{metric}: {value:.4f}")
+
+    # Example single query retrieval
     results = retriever.retrieve(
-        query="what is machine learning",
+        query="What is dense retrieval?",
         k=100,
         rerank_k=10
     )
 
-    print("Top results:")
+    print("\nTop results for example query:")
     for result in results:
         print(f"Document ID: {result['id']}, Score: {result['score']}")
+        print(f"Text: {documents[result['id']]}\n")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 import json
-import re
+import re 
 
 # File paths
 file1_path = "merged_output.json"
@@ -63,11 +63,50 @@ def get_elements():
     # Prepare positive and negative docs
     positive_docs = []
     negative_docs = []
+    need_to_erase_list = []
+    
+    for num, query in query_mapping.items():
+        # Get relevant and non-relevant docnos for the current query
+        relevant_docnos = doc_mapping.get(num, {}).get("positive", [])
+        non_relevant_docnos = doc_mapping.get(num, {}).get("negative", [])
+
+        if not relevant_docnos and not non_relevant_docnos:
+            need_to_erase_list.append(query)
+            continue  # Skip this query if there are no positive or negative documents
+
+        # Find one relevant document (positive)
+        pos_doc = next((doc["TEXT"] for doc in file1_data if doc["DOCNO"] in relevant_docnos), "No relevant document found.")
+        positive_docs.append(pos_doc)
+
+        # Find one non-relevant document (negative)
+        neg_doc = next((doc["TEXT"] for doc in file1_data if doc["DOCNO"] in non_relevant_docnos), "No unrelated document found.")
+        negative_docs.append(neg_doc)
+    
+    for query in need_to_erase_list:
+        queries.remove(query)
+
+    return queries, positive_docs, negative_docs
+
+def get_elements_train():
+    file1_data = read_file1(file1_path)
+    queries, query_mapping = read_file2(file2_paths)
+    doc_mapping = read_file3(file3_path)
+
+    # Prepare positive and negative docs
+    positive_docs = []
+    negative_docs = []
+
+    need_to_erase_list = []
 
     for num, query in query_mapping.items():
         # Get relevant and non-relevant docnos for the current query
         relevant_docnos = doc_mapping.get(num, {}).get("positive", [])
         non_relevant_docnos = doc_mapping.get(num, {}).get("negative", [])
+
+        # Check if there are any positive or negative documents for the query
+        if not relevant_docnos or not non_relevant_docnos:
+            need_to_erase_list.append(query)
+            continue  # Skip this query if there are no positive or negative documents
 
         # Find one relevant document (positive)
         pos_doc = next((doc["TEXT"] for doc in file1_data if doc["DOCNO"] in relevant_docnos), "No relevant document found.")
@@ -77,7 +116,10 @@ def get_elements():
         neg_doc = next((doc["TEXT"] for doc in file1_data if doc["DOCNO"] in non_relevant_docnos), "No unrelated document found.")
         negative_docs.append(neg_doc)
 
-    return queries, positive_docs, negative_docs
+    for query in need_to_erase_list:
+        queries.remove(query)
+
+    return queries[:-40], positive_docs[:-40], negative_docs[:-40]
 
 # Save data to files
 def save_list_to_file(data, file_path):
@@ -85,13 +127,14 @@ def save_list_to_file(data, file_path):
         for item in data:
             f.write(item + "\n")
 
-queries, positive_docs, negative_docs = get_elements()
+def save():
+    queries, positive_docs, negative_docs = get_elements()
 
-save_list_to_file(queries, queries_file)
-save_list_to_file(positive_docs, positive_docs_file)
-save_list_to_file(negative_docs, negative_docs_file)
+    save_list_to_file(queries, queries_file)
+    save_list_to_file(positive_docs, positive_docs_file)
+    save_list_to_file(negative_docs, negative_docs_file)
 
-print("Data processing complete. Files saved:")
-print(f"- Queries: {queries_file}")
-print(f"- Positive Docs: {positive_docs_file}")
-print(f"- Negative Docs: {negative_docs_file}")
+    print("Data processing complete. Files saved:")
+    print(f"- Queries: {queries_file}")
+    print(f"- Positive Docs: {positive_docs_file}")
+    print(f"- Negative Docs: {negative_docs_file}")
