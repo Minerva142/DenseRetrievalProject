@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from torch.nn import functional as F
 from data_prepare_files.data_preparing_rerank_bert import get_elements_train
 
+
 @dataclass
 class QueryDocument:
     query_id: int
@@ -31,8 +32,10 @@ class CrossAttentionReranker(nn.Module):
         # Use explicit SEP token ID (102 for BERT)
         sep_token = torch.full((query_ids.size(0), 1), 102,
                                device=query_ids.device)
-        input_ids = torch.cat([query_ids, sep_token, pos_ids], dim=1)
-        attention_mask = torch.cat([query_mask,
+        # Ensure pos_ids is reshaped to match dimensions
+        pos_ids = pos_ids.view(pos_ids.size(0), -1, pos_ids.size(-1))  # Reshape pos_ids to [batch_size, num_positives, seq_len]
+        input_ids = torch.cat([query_ids.unsqueeze(1), sep_token, pos_ids], dim=1)  # Unsqueeze query_ids to match dimensions
+        attention_mask = torch.cat([query_mask.unsqueeze(1),
                                     torch.ones_like(sep_token),
                                     pos_mask], dim=1)
 
@@ -230,8 +233,8 @@ def train_enhanced_retriever(
             retriever_optimizer.step()
 
             # Second stage: Train reranker
-            reranker_scores_pos = reranker(query_ids, query_mask, pos_ids, pos_mask)
-            reranker_scores_neg = reranker(query_ids, query_mask, neg_ids, neg_mask)
+            reranker_scores_pos = reranker(query_ids.unsqueeze(1), query_mask.unsqueeze(1), pos_ids, pos_mask)  # Unsqueeze query_ids and query_mask
+            reranker_scores_neg = reranker(query_ids.unsqueeze(1), query_mask.unsqueeze(1), neg_ids, neg_mask)  # Unsqueeze query_ids and query_mask
 
             reranker_loss = reranker_criterion(
                 query_emb,
@@ -256,6 +259,7 @@ def train_enhanced_retriever(
     return retriever, reranker
 
 def load_query_documents():
+
     queries, positive_docs, negative_docs = get_elements_train()
 
     q_num = 0
@@ -309,7 +313,7 @@ def main():
         learning_rate=2e-5,
         device=device
     )
-    model_path = '../saved_models_for_with_rerank'
+    model_path = 'saved_models_for_with_rerank'
     # Save models
     torch.save(trained_retriever.state_dict(), os.path.join(model_path, "multi_positive_rerank_retriever.pt"))
     torch.save(trained_reranker.state_dict(), os.path.join(model_path, "multi_positive_reranker.pt"))
