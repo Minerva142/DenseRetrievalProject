@@ -4,8 +4,8 @@ import re
 
 # File paths (update with actual file paths)
 file1_path = "../merged_output.json"
-file2_paths = ["q-topics-org-SET1.txt", "q-topics-org-SET2.txt", "q-topics-org-SET3.txt"]
-file3_path = "../filtered_data.txt"
+file2_paths = ["../data_prepare_files/q-topics-org-SET1.txt", "../data_prepare_files/q-topics-org-SET1.txt", "../data_prepare_files/q-topics-org-SET1.txt"]
+file3_path = "../data_prepare_files/filtered_data.txt"
 
 out_queries_path = "../queries_rerank.txt"
 out_positive_docs_path = "../positive_docs_rerank.json"

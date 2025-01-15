@@ -3,8 +3,8 @@ import re
 
 
 file1_path = "../merged_output.json"
-file2_paths = ["q-topics-org-SET1.txt", "q-topics-org-SET2.txt", "q-topics-org-SET3.txt"]
-file3_path = "../filtered_data.txt"
+file2_paths = ["../data_prepare_files/q-topics-org-SET1.txt", "../data_prepare_files/q-topics-org-SET2.txt", "../data_prepare_files/q-topics-org-SET3.txt"]
+file3_path = "../data_prepare_files/filtered_data.txt"
 
 
 def save_to_json(data, filename):
@@ -40,6 +40,38 @@ def parse_files():
     file3_path: Path to the third file containing relevance judgments.
     """
     # Step 1: Read file1 - Documents
+    documents = {}
+    with open(file1_path, 'r') as f1:
+        file1_data = json.load(f1)
+        for doc in file1_data:
+            doc_id = doc['DOCNO']
+            documents[doc_id] = doc['TEXT']
+
+    # Step 2: Read file2 - Queries (TXT Files)
+
+    all_queries = {}
+    for file2_path in file2_paths:
+        with open(file2_path, 'r') as f2:
+            text = f2.read()
+            queries = parse_trec_topics(text)
+            all_queries.update(queries)
+
+
+    # Step 3: Read file3 - Qrels (relevance judgments)
+    qrels = {}
+    with open(file3_path, 'r') as f3:
+        for line in f3:
+            parts = line.strip().split()
+            query_id = f"{parts[0]}"
+            doc_id = parts[2]
+            relevance = int(parts[3])
+            if query_id not in qrels:
+                qrels[query_id] = {}
+            qrels[query_id][doc_id] = relevance
+
+    return format_datasets(all_queries, documents, qrels)
+
+def parse_files_with_paths(file1_path, file2_paths, file3_path):
     documents = {}
     with open(file1_path, 'r') as f1:
         file1_data = json.load(f1)
@@ -119,13 +151,14 @@ def format_datasets_all(queries, documents, qrels):
     return formatted_queries, formatted_documents, formatted_qrels
 
 
+def save():
 
-# Process the files
-queries, documents, qrels = parse_files()
+    # Process the files
+    queries, documents, qrels = parse_files()
 
-save_to_json(queries, '../formatted_queries.json')
-save_to_json(documents, '../formatted_documents.json')
-save_to_json(qrels, '../formatted_qrels.json')
+    save_to_json(queries, '../formatted_queries.json')
+    save_to_json(documents, '../formatted_documents.json')
+    save_to_json(qrels, '../formatted_qrels.json')
 
 # Format the datasets
 #formatted_queries, formatted_documents, formatted_qrels = format_datasets(queries, documents, qrels)

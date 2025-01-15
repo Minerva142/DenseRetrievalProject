@@ -3,8 +3,8 @@ import re
 
 # File paths
 file1_path = "../merged_output.json"
-file2_paths = ["q-topics-org-SET1.txt", "q-topics-org-SET2.txt", "q-topics-org-SET3.txt"]
-file3_path = "../filtered_data.txt"
+file2_paths = ["../data_prepare_files/q-topics-org-SET1.txt", "../data_prepare_files/q-topics-org-SET2.txt", "../data_prepare_files/q-topics-org-SET3.txt"]
+file3_path = "../data_prepare_files/filtered_data.txt"
 
 
 # Output files
