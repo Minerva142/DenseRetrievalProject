@@ -18,17 +18,17 @@ def parse_trec_topics(text, use_desc = False):
 
     # Find all topic sections
     topics = re.findall(r'<top>.*?</top>', text, re.DOTALL)
+    descriptions = re.findall(r"<desc> Description:\s*(.*?)\n\s*<narr>", text, re.DOTALL)
 
-    for topic in topics:
+    for topic, desc in zip(topics,descriptions):
         # Extract number
         number_match = re.search(r'<num>\s*Number:\s*(\d+)', topic)
         # Extract title
         title_match = re.search(r'<title>\s*(.*?)\s*(?=<desc>|$)', topic)
-        desc_match = re.search(r'<desc>\s*(.*?)\s*(?=<narr>|$)', topic)
         if use_desc:
-            if number_match and desc_match:
+            if number_match:
                 number = number_match.group(1)
-                desc = desc_match.group(1).strip()
+                desc = re.sub(r"\s+", " ", desc.strip())
                 queries[number] = desc
         else:
             if number_match and title_match:

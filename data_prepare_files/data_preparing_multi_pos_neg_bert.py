@@ -24,14 +24,14 @@ def read_file2(file_paths, use_desc = False):
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
             topics = re.findall(r"<top>(.*?)</top>", content, re.DOTALL)
-            for topic in topics:
+            descriptions = re.findall(r"<desc> Description:\s*(.*?)\n\s*<narr>", content, re.DOTALL)
+            for topic, desc in zip(topics,descriptions):
                 num_match = re.search(r"<num> Number: (\d+)", topic)
                 title_match = re.search(r"<title>\s*(.*?)\s*<desc>", topic, re.DOTALL)
-                desc_match = re.search(r"<desc> Description: \s*(.*?)\s*<narr>", topic, re.DOTALL)
                 if use_desc:
-                    if num_match and desc_match:
+                    if num_match:
                         num = num_match.group(1).strip()
-                        desc = title_match.group(1).strip()
+                        desc = re.sub(r"\s+", " ", desc.strip())
                         queries.append(desc)
                         query_mapping[num] = desc
                 else:
