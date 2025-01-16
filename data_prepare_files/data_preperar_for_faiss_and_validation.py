@@ -2,7 +2,7 @@ import json
 import re
 
 
-file1_path = "../merged_output.json"
+file1_path = "../data_prepare_files/merged_output.json"
 file2_paths = ["../data_prepare_files/q-topics-org-SET1.txt", "../data_prepare_files/q-topics-org-SET2.txt", "../data_prepare_files/q-topics-org-SET3.txt"]
 file3_path = "../data_prepare_files/filtered_data.txt"
 
@@ -12,7 +12,7 @@ def save_to_json(data, filename):
     with open(filename, 'w') as f:
         json.dump(data, f, indent=4)
 
-def parse_trec_topics(text):
+def parse_trec_topics(text, use_desc = False):
     # Initialize empty dictionary for queries
     queries = {}
 
@@ -24,15 +24,21 @@ def parse_trec_topics(text):
         number_match = re.search(r'<num>\s*Number:\s*(\d+)', topic)
         # Extract title
         title_match = re.search(r'<title>\s*(.*?)\s*(?=<desc>|$)', topic)
-
-        if number_match and title_match:
-            number = number_match.group(1)
-            title = title_match.group(1).strip()
-            queries[number] = title
+        desc_match = re.search(r'<desc>\s*(.*?)\s*(?=<narr>|$)', topic)
+        if use_desc:
+            if number_match and desc_match:
+                number = number_match.group(1)
+                desc = desc_match.group(1).strip()
+                queries[number] = desc
+        else:
+            if number_match and title_match:
+                number = number_match.group(1)
+                title = title_match.group(1).strip()
+                queries[number] = title
 
     return queries
 
-def parse_files():
+def parse_files(use_desc = False):
     """
     Reads the files and returns the datasets in the desired structure.
     file1_path: Path to the first file containing document details.
@@ -53,7 +59,7 @@ def parse_files():
     for file2_path in file2_paths:
         with open(file2_path, 'r') as f2:
             text = f2.read()
-            queries = parse_trec_topics(text)
+            queries = parse_trec_topics(text, use_desc)
             all_queries.update(queries)
 
 
@@ -71,7 +77,7 @@ def parse_files():
 
     return format_datasets(all_queries, documents, qrels)
 
-def parse_files_with_paths(file1_path, file2_paths, file3_path):
+def parse_files_with_paths(file1_path, file2_paths, file3_path, use_Desc = False):
     documents = {}
     with open(file1_path, 'r') as f1:
         file1_data = json.load(f1)

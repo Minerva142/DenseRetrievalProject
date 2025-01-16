@@ -3,7 +3,7 @@ import re
 
 
 # File paths (update with actual file paths)
-file1_path = "../merged_output.json"
+file1_path = "../data_prepare_files/merged_output.json"
 file2_paths = ["../data_prepare_files/q-topics-org-SET1.txt", "../data_prepare_files/q-topics-org-SET2.txt", "../data_prepare_files/q-topics-org-SET3.txt"]
 file3_path = "../data_prepare_files/filtered_data.txt"
 
@@ -17,7 +17,7 @@ def read_file1(file_path):
         return json.load(f)
 
 # Read File 2 (TOP format)
-def read_file2(file_paths):
+def read_file2(file_paths, use_desc = False):
     queries = []
     query_mapping = {}
     for file_path in file_paths:
@@ -27,11 +27,19 @@ def read_file2(file_paths):
             for topic in topics:
                 num_match = re.search(r"<num> Number: (\d+)", topic)
                 title_match = re.search(r"<title>\s*(.*?)\s*<desc>", topic, re.DOTALL)
-                if num_match and title_match:
-                    num = num_match.group(1).strip()
-                    title = title_match.group(1).strip()
-                    queries.append(title)
-                    query_mapping[num] = title
+                desc_match = re.search(r"<desc> Description: \s*(.*?)\s*<narr>", topic, re.DOTALL)
+                if use_desc:
+                    if num_match and desc_match:
+                        num = num_match.group(1).strip()
+                        desc = title_match.group(1).strip()
+                        queries.append(desc)
+                        query_mapping[num] = desc
+                else:
+                    if num_match and title_match:
+                        num = num_match.group(1).strip()
+                        title = title_match.group(1).strip()
+                        queries.append(title)
+                        query_mapping[num] = title
     return queries, query_mapping
 
 # Read File 3 (Tab-separated format)
@@ -56,9 +64,9 @@ def read_file3(file_path):
 
 #todo  GET AT MOST 10
 # Process files
-def get_elements():
+def get_elements(use_desc = False):
     file1_data = read_file1(file1_path)
-    queries, query_mapping = read_file2(file2_paths)
+    queries, query_mapping = read_file2(file2_paths, use_desc)
     doc_mapping = read_file3(file3_path)
 
     # Prepare positive and negative docs
@@ -90,9 +98,9 @@ def get_elements():
     return queries, positive_docs, negative_docs
 
 # Process files
-def get_elements_train():
+def get_elements_train(use_desc = False):
     file1_data = read_file1(file1_path)
-    queries, query_mapping = read_file2(file2_paths)
+    queries, query_mapping = read_file2(file2_paths, use_desc)
     doc_mapping = read_file3(file3_path)
 
     # Prepare positive and negative docs
