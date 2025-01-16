@@ -6,14 +6,14 @@ import os
 import pytrec_eval
 from collections import defaultdict
 from typing import Dict, List, Tuple
-
+from data_prepare_files.data_preperar_for_faiss_and_validation import parse_files
 
 class SBERTRetriever:
     def __init__(
             self,
             model_name: str = 'all-MiniLM-L6-v2',
-            index_path: str = 'saved_model/faiss_index.bin',
-            embeddings_path: str = 'saved_model/document_embeddings.npy'
+            index_path: str = '../saved_model_SBERT/faiss_index.bin',
+            embeddings_path: str = '../saved_model_SBERT/document_embeddings.npy'
     ):
         self.model = SentenceTransformer(model_name)
         self.index_path = index_path
@@ -131,11 +131,6 @@ class SBERTRetriever:
 
 
 def main():
-    # Example usage
-    def parse_files():
-        # Implement your data loading logic here
-        # Return: queries, documents, qrels dictionaries
-        pass
 
     # Initialize retriever
     retriever = SBERTRetriever(
@@ -144,8 +139,9 @@ def main():
         embeddings_path='../saved_model_SBERT/document_embeddings.npy'
     )
 
+    use_desc = False
     # Load your data
-    queries, documents, qrels = parse_files()
+    queries, documents, qrels = parse_files(use_desc)
 
     # Evaluate
     metrics, results = retriever.evaluate_retrieval(

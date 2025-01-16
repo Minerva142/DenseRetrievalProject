@@ -141,7 +141,8 @@ if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
-    queries, documents, qrels = parse_files()
+    use_desc = True
+    queries, documents, qrels = parse_files(use_desc)
 
     # Evaluate
     metrics, results = evaluate_retrieval(queries, documents, qrels, model, tokenizer, device)
