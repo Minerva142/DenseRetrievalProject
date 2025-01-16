@@ -58,6 +58,8 @@ class SBERTRetriever:
 
         print("Building FAISS index...")
         dimension = doc_embeddings.shape[1]
+
+        doc_embeddings = doc_embeddings / np.linalg.norm(doc_embeddings, axis=1, keepdims=True)  # {{ edit_1 }}
         self.index = faiss.IndexFlatIP(dimension)
         self.index.add(doc_embeddings)
 
@@ -68,6 +70,8 @@ class SBERTRetriever:
     def search(self, query: str, doc_ids: List[str], k: int = 10) -> Tuple[List[str], List[float]]:
         """Search for most similar documents to query"""
         query_embedding = self.encode_texts([query])
+
+        query_embedding = query_embedding / np.linalg.norm(query_embedding)
         D, I = self.index.search(query_embedding, k)
 
         # Normalize scores
