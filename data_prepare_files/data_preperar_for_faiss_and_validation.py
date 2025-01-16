@@ -112,8 +112,8 @@ def parse_files_with_paths(file1_path, file2_paths, file3_path, use_Desc = False
 
 def format_datasets(queries, documents, qrels):
     # Get the first 35000 documents
-    formatted_documents = {doc_id: text for doc_id, text in list(documents.items())[:50000]}
-       
+    formatted_documents = {doc_id: text for doc_id, text in list(documents.items())[:70000]}
+    #formatted_documents = {doc_id: text for doc_id, text in list(documents.items())}
 
     # elimate the non-relevant queries
     formatted_queries = {qid: text for qid, text in list(queries.items())}
@@ -123,7 +123,7 @@ def format_datasets(queries, documents, qrels):
         has_rel_qids.append(qid)
 
     formatted_queries = {qid: text for qid, text in formatted_queries.items() if qid in has_rel_qids}
-    formatted_queries = {qid: text for qid, text in list(formatted_queries.items())[-40:]}
+    formatted_queries = {qid: text for qid, text in list(formatted_queries.items())[-55:]}
 
     # Adjust qrels based on the selected documents
     formatted_qrels = {}
@@ -158,9 +158,9 @@ def format_datasets_all(queries, documents, qrels):
 
 
 def save():
-
+    use_desc = False
     # Process the files
-    queries, documents, qrels = parse_files()
+    queries, documents, qrels = parse_files(use_desc)
 
     save_to_json(queries, '../formatted_queries.json')
     save_to_json(documents, '../formatted_documents.json')
