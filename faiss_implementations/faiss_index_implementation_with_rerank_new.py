@@ -5,6 +5,7 @@ from typing import Dict, List
 from transformers import AutoTokenizer
 import pytrec_eval
 from tqdm import tqdm
+from sklearn.preprocessing import normalize
 
 from data_prepare_files.data_preperar_for_faiss_and_validation import parse_files
 from model_implementations.projectBertWithReRank_2 import DualEncoder, CrossEncoder
@@ -15,6 +16,12 @@ path_of_emb = '../saved_models_for_with_rerank/doc_embeddings_re_ranker.npy' # w
 path_of_faiss = '../saved_models_for_with_rerank/doc_faiss_with_reranker.bin'
 use_already_exists_emb = False
 use_already_exists_faiss = False
+
+def normalize_vectors(vectors):
+    """
+    Normalize vectors to unit length
+    """
+    return normalize(vectors, norm='l2')
 class DenseRetrieverReRank:
     def __init__(
             self,
@@ -74,13 +81,14 @@ class DenseRetrieverReRank:
                     ).cpu().numpy()
                     np.save(path_of_emb, embeddings)
 
-
+            embeddings = normalize_vectors(embeddings)
             # Add to index
             self.index.add(embeddings)
 
             # Update document mapping
             for idx, (doc_id, _) in enumerate(batch_docs):
                 self.doc_mapping[i + idx] = doc_id
+            print(self.doc_mapping)
 
     @torch.no_grad()
     def retrieve(
@@ -106,6 +114,7 @@ class DenseRetrieverReRank:
             query_inputs['attention_mask']
         ).cpu().numpy()
 
+        query_embedding = normalize_vectors(query_embedding)
         # First stage retrieval with FAISS
         scores, indices = self.index.search(query_embedding, k)
         doc_ids = [self.doc_mapping[int(idx)] for idx in indices[0]]
@@ -209,7 +218,7 @@ def main():
         cross_encoder_path='../saved_models_for_with_rerank/cross_encoder.pt'
     )
 
-    use_desc = False
+    use_desc = True
     queries, documents, qrels = parse_files(use_desc)
 
     # Build and save index
