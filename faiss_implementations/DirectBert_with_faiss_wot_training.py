@@ -4,6 +4,7 @@ import faiss
 import numpy as np
 import pytrec_eval
 from data_prepare_files.data_preperar_for_faiss_and_validation import parse_files
+from sklearn.preprocessing import normalize
 import os
 
 # Initialize BERT model and tokenizer
@@ -24,7 +25,11 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 model = model.to(device)  # Move model to GPU
 
-
+def normalize_vectors(vectors):
+    """
+    Normalize vectors to unit length
+    """
+    return normalize(vectors, norm='l2')
 # Function to encode text using BERT
 def encode_text(text):
     inputs = tokenizer(text, return_tensors='pt', padding=True, truncation=True, max_length=512)
@@ -75,6 +80,7 @@ else:
         index = faiss.IndexFlatIP(dimension)
 
     doc_vectors = np.array(list(doc_embeddings.values()))
+    doc_vectors = normalize_vectors(doc_vectors)
     index.add(doc_vectors)
 
     # Convert back to CPU for saving if necessary
@@ -86,15 +92,19 @@ if not use_already_exists_emb:
     doc_vectors = np.array(list(doc_embeddings.values()))
     np.save(path_of_emb, doc_vectors)
 
+
 query_embeddings = {query_id: encode_text(text) for query_id, text in queries.items()}
 
+query_vectors = np.array(list(query_embeddings.values()))
+query_keys = list(query_embeddings.keys())
+query_vectors = normalize_vectors(query_vectors)
 # If using GPU, convert index back to GPU for search
 #if torch.cuda.is_available() and not use_already_exists_faiss:
     #res = faiss.StandardGpuResources()
     #index = faiss.index_cpu_to_gpu(res, 0, index)
 
 retrieved_docs = {}
-for query_id, query_vector in query_embeddings.items():
+for query_id, query_vector in zip(query_keys,query_vectors):
     dists, indices = index.search(np.array([query_vector]), k=10)
     dists = normalize_scores(dists[0])
     # Create a dictionary with document IDs and a default relevance score

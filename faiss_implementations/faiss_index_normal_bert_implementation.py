@@ -7,13 +7,18 @@ import os
 import pytrec_eval
 from collections import defaultdict
 from data_prepare_files.data_preperar_for_faiss_and_validation import parse_files
-
+from sklearn.preprocessing import normalize
 
 use_already_exist_faiss = False
 use_already_exist_doc_embeddings = False
 faiss_path = os.path.join("../saved_model_normal_bert", "faiss_index.bin")
 doc_embeedings_path = os.path.join("../saved_model_normal_bert", "document_embeddings.npy")
 
+def normalize_vectors(vectors):
+    """
+    Normalize vectors to unit length
+    """
+    return normalize(vectors, norm='l2')
 def normalize_scores(scores):
     min_score = min(scores)
     max_score = max(scores)
@@ -94,6 +99,7 @@ def evaluate_retrieval(queries, documents, qrels, model, tokenizer, device="gpu"
         # Create FAISS index
         dimension = doc_embeddings.shape[1]
         index = faiss.IndexFlatIP(dimension)
+        doc_embeddings = doc_embeddings / np.linalg.norm(doc_embeddings, axis=1, keepdims=True)  # {{ edit_1 }}
         index.add(doc_embeddings)
         # {{ edit_1 }}: Save the FAISS index to a file
         faiss.write_index(index, faiss_path)
@@ -105,6 +111,7 @@ def evaluate_retrieval(queries, documents, qrels, model, tokenizer, device="gpu"
     k = 10  # Number of results to retrieve
     for qid, query_text in queries.items():
         query_emb = encode_texts([query_text], model, tokenizer, device=device)
+        query_emb = query_emb / np.linalg.norm(query_emb, axis=1, keepdims=True)
         D, I = index.search(query_emb, k)
 
         D[0] = normalize_scores(D[0])
