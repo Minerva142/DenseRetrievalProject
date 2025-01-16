@@ -11,11 +11,11 @@ from model_implementations.projectBertWithReRank_2 import DualEncoder, CrossEnco
 import os
 
 model_path = '../saved_models_for_with_rerank'
-path_of_emb = os.path.join(model_path, 'doc_embeddings_re_ranker.npy') # we can use them from standart embeedings
-path_of_faiss = os.path.join(model_path, 'doc_faiss_with_reranker.bin')
+path_of_emb = '../saved_models_for_with_rerank/doc_embeddings_re_ranker.npy' # we can use them from standart embeedings
+path_of_faiss = '../saved_models_for_with_rerank/doc_faiss_with_reranker.bin'
 use_already_exists_emb = False
 use_already_exists_faiss = False
-class DenseRetriever:
+class DenseRetrieverReRank:
     def __init__(
             self,
             dual_encoder_path: str,
@@ -66,13 +66,14 @@ class DenseRetriever:
             # Get embeddings using dual encoder
             with torch.no_grad():
                 if use_already_exists_emb:
+                    embeddings = np.load(path_of_emb)
+                else:
                     embeddings = self.dual_encoder.encode(
                         inputs['input_ids'],
                         inputs['attention_mask']
                     ).cpu().numpy()
                     np.save(path_of_emb, embeddings)
-                else:
-                    embeddings = np.load(path_of_emb)
+
 
             # Add to index
             self.index.add(embeddings)
@@ -203,11 +204,13 @@ class DenseRetriever:
 
 def main():
     # Initialize retriever
-    retriever = DenseRetriever(
+    retriever = DenseRetrieverReRank(
         dual_encoder_path='../saved_models_for_with_rerank/dual_encoder.pt',
         cross_encoder_path='../saved_models_for_with_rerank/cross_encoder.pt'
     )
-    queries, documents, qrels = parse_files()
+
+    use_desc = False
+    queries, documents, qrels = parse_files(use_desc)
 
     # Build and save index
     retriever.build_index(documents)

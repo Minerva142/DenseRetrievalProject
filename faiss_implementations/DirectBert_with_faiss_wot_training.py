@@ -40,8 +40,8 @@ def normalize_scores(scores):
     max_score = max(scores)
     return [(score - min_score) / (max_score - min_score) for score in scores]
 
-
-queries, documents, qrels = parse_files()
+use_desc = False
+queries, documents, qrels = parse_files(use_desc)
 print(len(documents.keys()))
 print("data readed")
 

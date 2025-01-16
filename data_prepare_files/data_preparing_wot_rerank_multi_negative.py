@@ -1,5 +1,6 @@
 import json
 import os
+import re
 
 def parse_topics_file(file_path):
     """Parse the XML-like topics file to get query id and text"""
@@ -7,8 +8,8 @@ def parse_topics_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
         topics = content.split('<top>')[1:]
-        
-        for topic in topics:
+        descriptions = re.findall(r"<desc> Description:\s*(.*?)\n\s*<narr>", content, re.DOTALL)
+        for topic, desc in zip (topics, descriptions):
             # Extract number (query id)
             num_start = topic.find('<num>') + len('<num> Number: ')
             num_end = topic.find('\n', num_start)

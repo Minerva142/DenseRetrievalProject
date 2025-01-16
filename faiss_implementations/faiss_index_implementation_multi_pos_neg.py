@@ -139,8 +139,9 @@ if __name__ == "__main__":
     retriever_index = DenseRetrieverIndex(os.path.join(model_path, "final_dense_retriever.pt"))
     retriever_index.retriever.tokenizer = AutoTokenizer.from_pretrained(model_path)
 
+    use_desc = False
     # Load data
-    queries, documents, qrels = parse_files()
+    queries, documents, qrels = parse_files(use_desc)
 
     # Build index
     retriever_index.build_index(documents)

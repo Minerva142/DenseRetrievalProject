@@ -187,7 +187,8 @@ if __name__ == "__main__":
     # Initialize evaluator
     evaluator = SearchEvaluator()
 
-    queries, documents, relevant_docs= parse_files()
+    use_desc = False
+    queries, documents, relevant_docs= parse_files(use_desc)
 
     evaluator.build_index(documents)
     # Evaluate and print results

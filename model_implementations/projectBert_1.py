@@ -90,7 +90,9 @@ def train_dense_retriever(model, dataloader, optimizer, device, epochs=3, temper
     return epoch_loss / len(dataloader)
 
 if __name__ == "__main__":
-    queries, positive_docs, negative_docs = get_elements_train()
+
+    use_desc = True
+    queries, positive_docs, negative_docs = get_elements_train(use_desc)
 
     model_name = "bert-base-uncased"
     max_length = 128
