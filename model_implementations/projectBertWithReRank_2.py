@@ -313,8 +313,9 @@ def main():
     # Set device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+    use_desc = False
     # Load data
-    queries, positive_docs, negative_docs = get_elements_train()
+    queries, positive_docs, negative_docs = get_elements_train(use_desc)
 
     # Initialize tokenizer and models
     tokenizer = AutoTokenizer.from_pretrained("microsoft/mpnet-base")

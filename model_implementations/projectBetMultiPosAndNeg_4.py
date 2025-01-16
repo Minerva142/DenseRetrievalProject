@@ -156,7 +156,8 @@ if __name__ == "__main__":
     # Enable CUDA optimizations
     torch.backends.cudnn.benchmark = True
 
-    queries, positive_docs, negative_docs_list = get_elements_train()
+    use_desc = False
+    queries, positive_docs, negative_docs_list = get_elements_train(use_desc)
 
     model = BertDenseRetriever()
     model.to(device)  # Ensure model is on GPU
