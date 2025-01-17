@@ -190,18 +190,19 @@ calculated metrics, loss or other different values are listed [here](https://git
 
 **BERT based with or w/o fine-tune results:**
 
-| Model & Query Type                                  | Parameters | Dimension | Test Document Size | MAP@10 | P@10   | Recall@5 | Recall@10 | NDCG@10 |
-|-----------------------------------------------------|------------|-----------|--------------------|--------|--------|-----------|-----------|---------|
-| Normal BERT w/o training, title as query           | 110M        | 768       | 50,000             | 0.0198 | 0.0613 | 0.0156    | 0.0562    | 0.0556  |
-| Normal BERT w/o fine-tuning, title as query        | 110M        | 768       | 100,000            | 0.0047 | 0.0452 | 0.0011    | 0.0175    | 0.0336  |
-| Normal BERT fine-tuned, title as query             | Fine-tuned | 768       | 50,000             | 0.0553 | 0.0903 | 0.1017    | 0.1350    | 0.1258  |
-| SBERT, title as query                              | Fine-tuned | 768       | 50,000             | **0.1211** | **0.2065** | **0.1239** | **0.2379** | **0.2447** |
-| Reranker (cross-encoder & dual encoder), title     | 110M + 22.5M        | 768       | 50,000             | 0.0023 | 0.0129 | -         | 0.0114    | 0.0094  |
-| Normal BERT fine-tuned, title as query             | Fine-tuned | 768       | 100,000            | 0.0410 | 0.1419 | 0.0404    | 0.0939    | 0.1443  |
-| Normal BERT fine-tuned, desc as query              | Fine-tuned | 768       | 50,000             | 0.0796 | 0.1194 | 0.1161    | 0.1729    | 0.1556  |
-| Normal BERT w/o fine-tuning, desc as query         | 110M        | 768       | 50,000             | 0.0079 | 0.0161 | 0.0054    | 0.0269    | 0.0165  |
-| Reranker (cross-encoder & dual encoder), desc      | 110M + 22.5M        | 768       | 50,000             | 0.0073 | 0.0161 | -         | 0.0180    | 0.0203  |
-| Multi Pos and Negs BERT Train                      | Fine-tuned | 768       | 50,000             | 0.0390 | 0.0480 | 0.0590    | 0.0590    | 0.0760  |
+| Model & Query Type                                   | Parameters       | Dimension | NDCG@10 | MAP@10 | P@10   | Recall@5 | Recall@10 | Test Document Size |
+|-----------------------------------------------------|------------------|-----------|---------|--------|--------|-----------|-----------|--------------------|
+| Normal BERT w/o training, title as query            | 110M            | 768       | 0.0556  | 0.0198 | 0.0613 | 0.0156    | 0.0562    | 50,000             |
+| Normal BERT w/o fine-tuning, title as query         | 110M            | 768       | 0.0336  | 0.0047 | 0.0452 | 0.0011    | 0.0175    | 100,000            |
+| Normal BERT fine-tuned, title as query              | Fine-tuned       | 768       | 0.1258  | 0.0553 | 0.0903 | 0.1017    | 0.1350    | 50,000             |
+| SBERT, title as query                               | Fine-tuned       | 768       | 0.2447  | 0.1211 | 0.2065 | 0.1239    | 0.2379    | 50,000             |
+| Reranker (cross-encoder & dual encoder), title      | 110M + 22.5M    | 768       | 0.0094  | 0.0023 | 0.0129 | -         | 0.0114    | 50,000             |
+| Normal BERT fine-tuned, title as query              | Fine-tuned       | 768       | 0.1443  | 0.0410 | 0.1419 | 0.0404    | 0.0939    | 100,000            |
+| Normal BERT fine-tuned, desc as query               | Fine-tuned       | 768       | 0.1556  | 0.0796 | 0.1194 | 0.1161    | 0.1729    | 50,000             |
+| Normal BERT w/o fine-tuning, desc as query          | 110M            | 768       | 0.0165  | 0.0079 | 0.0161 | 0.0054    | 0.0269    | 50,000             |
+| Reranker (cross-encoder & dual encoder), desc       | 110M + 22.5M    | 768       | 0.0203  | 0.0073 | 0.0161 | -         | 0.0180    | 50,000             |
+| Multi Pos and Negs BERT Train                       | Fine-tuned       | 768       | 0.0760  | 0.0390 | 0.0480 | 0.0590    | 0.0590    | 50,000             |
+
 
 
 
