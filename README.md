@@ -38,18 +38,15 @@ graph LR
     R1 --> CE[Cross-Encoder]
     Q --> CE
     CE --> R2[Top 10 Results]
-
-    style BE fill:#a8e6cf
-    style CE fill:#ffd3b6
-    style Q fill:#dcedc1
-    style D fill:#dcedc1
-    style R1 fill:#fff
-    style R2 fill:#fff
-
+    style BE fill:#a8e6cf,color:black
+    style CE fill:#ffd3b6,color:black
+    style Q fill:#dcedc1,color:black
+    style D fill:#dcedc1,color:black
+    style R1 fill:#fff,color:black
+    style R2 fill:#fff,color:black
     subgraph Initial Retrieval
     BE
     end
-
     subgraph Reranking
     CE
     end
@@ -128,12 +125,16 @@ graph TD
         S --> R[Top-K Similar Documents]
     end
 
-    style D fill:#a8e6cf
-    style Q fill:#a8e6cf
-    style IX fill:#ffd3b6
-    style I fill:#dcedc1
-    style S fill:#ff9aa2
-    style R fill:#b5ead7
+    style D fill:#a8e6cf,color:#333333
+    style Q fill:#a8e6cf,color:#333333
+    style IX fill:#ffd3b6,color:#333333
+    style I fill:#dcedc1,color:#333333
+    style S fill:#ff9aa2,color:#ffffff
+    style R fill:#b5ead7,color:#333333
+    style T color:#ffffff
+    style E color:#ffffff
+    style V color:#ffffff
+    style QE color:#ffffff
 
 
 ```
