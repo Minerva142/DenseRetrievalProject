@@ -17,7 +17,7 @@ approaches number tagged with the number of approach(as suffix) to implementatio
     | epochs           | 3                   |
     | optimizer        | AdamW               |
 
-* [aprroach_2](https://github.com/Minerva142/DenseRetrievalProject/blob/main/model_implementations/projectBertWithReRank_2.py) is dense retrieval with reranking model .Training them with multiple positive and negative documents for each query. It uses already pre-trained(for starting point) cross encoder model as reranker and also use dual encoder for retrieving part. BCEWithLogitsLoss is used while training for cross_encoder and cross entropy loss used for dual_encoder . Here are the setup values:
+* [aprroach_2](https://github.com/Minerva142/DenseRetrievalProject/blob/main/model_implementations/projectBertWithReRank_2.py) is dense retrieval with reranking model .Training them with multiple positive and negative documents for each query. It uses already pre-trained(for starting point) cross encoder model as reranker and also use dual encoder for retrieving part. BCEWithLogitsLoss is used while training for cross_encoder and cross entropy loss used for dual_encoder. this approach is actually an approach that uses both a bi-encoder and a cross encoder, the bi-encoder lists the top 100 documents, then the cross encoder re-ranks these 100 documents and reduces them to 10. Here are the setup values:
   | Parameter                | Value                                      |
   |--------------------------|--------------------------------------------|
   | dual_encoder             | microsoft/mpnet-base                      |
@@ -87,36 +87,40 @@ queries :
 
 Used metrics are listed in below.
 
-| **Metrics**      | **Description**                                                                                                                            |
-|------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| **Metrics**      | **Description**                                                                                                                             |
+|------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
 | **map**          | Mean Average Precision (MAP) is the mean of the Average Precision scores for all queries. It measures how well documents are ranked across queries. |
-| **P_10**         | Precision at 10 (P@10) measures the fraction of relevant documents in the top 10 results for a query.                                      |
-| **recall_5**     | Recall at 5 (R@5) is the fraction of relevant documents retrieved among the top 5 results for a query.                                     |
-| **recall_10**    | Recall at 10 (R@10) is the fraction of relevant documents retrieved among the top 10 results for a query.                                  |
-| **ndcg_cut_10**  | Normalized Discounted Cumulative Gain at 10 (NDCG@10) evaluates the ranking quality of the top 10 results by considering both relevance and position. |
+| **P@10**         | Precision at 10 (P@10) measures the fraction of relevant documents in the top 10 results for a query.                                       |
+| **P@5**          | Precision at 5 (P@5) measures the fraction of relevant documents in the top 5 results for a query.                                          |
+| **recall@5**     | Recall at 5 (R@5) is the fraction of relevant documents retrieved among the top 5 results for a query.                                      |
+| **recall@10**    | Recall at 10 (R@10) is the fraction of relevant documents retrieved among the top 10 results for a query.                                   |
+| **ndcg_cut@10**  | Normalized Discounted Cumulative Gain at 10 (NDCG@10) evaluates the ranking quality of the top 10 results by considering both relevance and position. |
+| **NDCG@10**      | Normalized Discounted Cumulative Gain (NDCG@10) measures the quality of ranking by taking into account the position and relevance of results, normalized for comparison across queries. |
+| **recip_rank**   | Reciprocal Rank (RR) is the inverse of the rank of the first relevant document, providing insight into how quickly the first relevant result appears. |
+
 
 ## Comparisons
 
-// TODO fill there
-
 calculated metrics, loss or other different values are listed [here](https://github.com/Minerva142/DenseRetrievalProject/blob/main/metrics_and_expreiments_result.docx) as word document.
 
-| Model & Query Type                                  | Training Data | MAP    | P@10   | Recall@5 | Recall@10 | NDCG@10 |
-|-----------------------------------------------------|---------------|--------|--------|-----------|-----------|---------|
-| Normal BERT w/o training, title as query           | 50,000        | 0.0198 | 0.0613 | 0.0156    | 0.0562    | 0.0556  |
-| Normal BERT w/o fine-tuning, title as query        | 100,000       | 0.0047 | 0.0452 | 0.0011    | 0.0175    | 0.0336  |
-| Normal BERT trained, title as query                | 50,000        | 0.0553 | 0.0903 | 0.1017    | 0.1350    | 0.1258  |
-| SBERT, title as query                              | 50,000        | 0.1211 | 0.2065 | 0.1239    | 0.2379    | 0.2447  |
-| Reranker (cross-encoder & dual encoder), title     | 50,000        | 0.0023 | 0.0129 | -         | 0.0114    | 0.0094  |
-| Normal BERT trained, title as query                | 100,000       | 0.0410 | 0.1419 | 0.0404    | 0.0939    | 0.1443  |
-| Normal BERT trained, desc as query                 | 50,000        | 0.0796 | 0.1194 | 0.1161    | 0.1729    | 0.1556  |
-| Normal BERT w/o training, desc as query            | 50,000        | 0.0079 | 0.0161 | 0.0054    | 0.0269    | 0.0165  |
-| Reranker (cross-encoder & dual encoder), desc      | 50,000        | 0.0073 | 0.0161 | -         | 0.0180    | 0.0203  |
+| Model & Query Type                                  | Test Document Size | MAP    | P@10   | Recall@5 | Recall@10 | NDCG@10 |
+|-----------------------------------------------------|--------------------|--------|--------|-----------|-----------|---------|
+| Normal BERT w/o training, title as query           | 50,000             | 0.0198 | 0.0613 | 0.0156    | 0.0562    | 0.0556  |
+| Normal BERT w/o fine-tuning, title as query        | 100,000            | 0.0047 | 0.0452 | 0.0011    | 0.0175    | 0.0336  |
+| Normal BERT fine-tuned, title as query                | 50,000             | 0.0553 | 0.0903 | 0.1017    | 0.1350    | 0.1258  |
+| SBERT, title as query                              | 50,000             | **0.1211** | **0.2065** | **0.1239** | **0.2379** | **0.2447** |
+| Reranker (cross-encoder & dual encoder), title     | 50,000             | 0.0023 | 0.0129 | -         | 0.0114    | 0.0094  |
+| Normal BERT fine-tuned, title as query                | 100,000            | 0.0410 | 0.1419 | 0.0404    | 0.0939    | 0.1443  |
+| Normal BERT fine-tuned, desc as query                 | 50,000             | 0.0796 | 0.1194 | 0.1161    | 0.1729    | 0.1556  |
+| Normal BERT w/o fine-tuning, desc as query            | 50,000             | 0.0079 | 0.0161 | 0.0054    | 0.0269    | 0.0165  |
+| Reranker (cross-encoder & dual encoder), desc      | 50,000             | 0.0073 | 0.0161 | -         | 0.0180    | 0.0203  |
+| Multi Pos and Negs BERT Train                      | 50,000             | 0.0390 | 0.0480 | 0.0590    | 0.0590    | 0.0760  |
+
 
 
 ## Key Result
 
-// TODO fill there
+fine-tuned models did not show the expected performance increase. This could be due to an insufficiently deep fine-tuning process, or because the dataset is not large enough, or because we have errors in the approaches we tested empirically. We can say that the models that give the best results are the models that have been trained for this concept and whose parameters have been optimized for these cases. 
 
 ## Demo
 
