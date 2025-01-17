@@ -179,7 +179,7 @@ Used metrics are listed in below.
 | **recall@10**    | Recall at 10 (R@10) is the fraction of relevant documents retrieved among the top 10 results for a query.                                   |
 | **ndcg_cut@10**  | Normalized Discounted Cumulative Gain at 10 (NDCG@10) evaluates the ranking quality of the top 10 results by considering both relevance and position. |
 | **NDCG@10**      | Normalized Discounted Cumulative Gain (NDCG@10) measures the quality of ranking by taking into account the position and relevance of results, normalized for comparison across queries. |
-| **MRR**          | Mean Reciprocal Rank (MRR) is the average of the reciprocal ranks of the first relevant document across all queries.                         |
+| **MRR@10**       | Mean Reciprocal Rank (MRR) is the average of the reciprocal ranks of the first 10 relevant document across all queries.                         |
 
 
 
@@ -190,7 +190,7 @@ calculated metrics, loss or other different values are listed [here](https://git
 
 **BERT based with or w/o fine-tune results:**
 
-| Model & Query Type                                  | Parameters | Dimension | Test Document Size | MAP    | P@10   | Recall@5 | Recall@10 | NDCG@10 |
+| Model & Query Type                                  | Parameters | Dimension | Test Document Size | MAP@10 | P@10   | Recall@5 | Recall@10 | NDCG@10 |
 |-----------------------------------------------------|------------|-----------|--------------------|--------|--------|-----------|-----------|---------|
 | Normal BERT w/o training, title as query           | 110M        | 768       | 50,000             | 0.0198 | 0.0613 | 0.0156    | 0.0562    | 0.0556  |
 | Normal BERT w/o fine-tuning, title as query        | 110M        | 768       | 100,000            | 0.0047 | 0.0452 | 0.0011    | 0.0175    | 0.0336  |
@@ -205,9 +205,10 @@ calculated metrics, loss or other different values are listed [here](https://git
 
 
 
-**Already pre-trained models result:**
+**Already pre-trained models vs BM25:**
+Here [SentenceTransformer](https://sbert.net/docs/cross_encoder/pretrained_models.html) models and [llama3_2_1b_instruct](https://huggingface.co/meta-llama/Llama-3.2-1B-Instruct) was compared with BM25 using trec evaluation.
 
-| Model                             | Parameters | Dimensions | NDCG@10   | MAP      | MRR      | P@5     | P@10    | Recall@5 | Recall@10 |
+| Model                             | Parameters | Dimensions | NDCG@10   | MAP@10   | MRR@10   | P@5     | P@10    | Recall@5 | Recall@10 |
 |-----------------------------------|------------|------------|-----------|----------|----------|---------|---------|----------|-----------|
 | BM25                              |            |            | 0.2123    | 0.1304   | 0.5210   | 0.3154  | 0.2530  | 0.1332   | 0.1830    |
 | all-mpnet-base-v2                 | 109M       | 768        | **0.2433**| **0.1471**| 0.5760   | 0.3490  | 0.2946  | **0.1513**| **0.2151**|
@@ -227,9 +228,24 @@ calculated metrics, loss or other different values are listed [here](https://git
 
 ## Key Result
 
-fine-tuned models did not show the expected performance increase. This could be due to an insufficiently deep fine-tuning process, or because the dataset is not large enough, or because we have errors in the approaches we tested empirically. We can say that the models that give the best results are the models that have been trained for this concept and whose parameters have been optimized for these cases. While good performances were expected from large language models such as llama, the test results showed that llama was ineffective. We can say that this is because llama models are not a focused model from vector representation and vector representations are not at a sufficient level due to the predominance of attention. 
+fine-tuned models did not show the expected performance increase. This could be due to an insufficiently deep fine-tuning process, or because the dataset is not large enough, or because we have errors in the approaches we tested empirically. We can say that the models that give the best results are the SentenceTransformer (SBERT) models that have been pre-trained for semantic search. While good performances were expected from large language models such as llama, the test results showed that llama was ineffective. We can say that this is because llama models are not a designed for semantic search and vector representations are not at a sufficient level due to the predominance of attention. 
 
 ## Demo
 
 Little [demo](https://github.com/Minerva142/DenseRetrievalProject/blob/main/streamlit_UI.py) is provided.
 
+# Links to embeddings
+SentenceTransforbers & llama3.2-1b-instruct:
+* [multi-qa-distilbert-dot-v1](https://www.kaggle.com/datasets/erkhatkalkabay/multi-qa-distilbert-dot-v1-ft-embeddings)
+* [multi-qa-MiniLM-L6-dot-v1](https://www.kaggle.com/datasets/erkhatkalkabay/multi-qa-minilm-l6-dot-v1-ft-embeddings)
+* [multi-qa-mpnet-base-cos-v1](https://www.kaggle.com/datasets/erkhatkalkabay/multi-qa-mpnet-base-cos-v1-ft-embeddings)
+* [all-mpnet-base-v2](https://www.kaggle.com/datasets/erkhatkalkabay/all-mpnet-base-v2-ft-embeddings)
+* [all-distilroberta-v1](https://www.kaggle.com/datasets/erkhatkalkabay/all-distilroberta-v1-ft-embeddings)
+* [all-MiniLM-L12-v2](https://www.kaggle.com/datasets/erkhatkalkabay/all-minilm-l12-v2-ft-embeddings)
+* [all-MiniLM-L6-v2](https://www.kaggle.com/datasets/erkhatkalkabay/all-minilm-l6-v2-ft-embeddings)
+* [multi-qa-distilbert-cos-v1](https://www.kaggle.com/datasets/erkhatkalkabay/multi-qa-distilbert-cos-v1-ft-embeddings)
+* [multi-qa-MiniLM-L6-cos-v1](https://www.kaggle.com/datasets/erkhatkalkabay/multi-qa-minilm-l6-cos-v1-ft-embeddings)
+* [multi-qa-mpnet-base-dot-v1](https://www.kaggle.com/datasets/erkhatkalkabay/multi-qa-mpnet-base-dot-v1-ft-embeddings)
+* [distiluse-base-multilingual-cased-v1](https://www.kaggle.com/datasets/erkhatkalkabay/distiluse-base-multilingual-cased-v1-ft-embeddings)
+* [distiluse-base-multilingual-cased-v2](https://www.kaggle.com/datasets/erkhatkalkabay/distiluse-base-multilingual-cased-v2-ft-embeddings)
+* [llama3.2-1b-instruct](https://www.kaggle.com/datasets/erkhatkalkabay/llama3-2-1b-instruct-embeddings/)
