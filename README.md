@@ -125,12 +125,12 @@ graph TD
         S --> R[Top-K Similar Documents]
     end
 
-    style D fill:#a8e6cf,color:#333333
-    style Q fill:#a8e6cf,color:#333333
-    style IX fill:#ffd3b6,color:#333333
-    style I fill:#dcedc1,color:#333333
-    style S fill:#ff9aa2,color:#ffffff
-    style R fill:#b5ead7,color:#333333
+    style D fill:#a8e6cf,color:black
+    style Q fill:#a8e6cf,color:black
+    style IX fill:#ffd3b6,color:black
+    style I fill:#dcedc1,color:black
+    style S fill:#ff9aa2,color:black
+    style R fill:#b5ead7,color:black
     style T color:black
     style E color:black
     style V color:black
