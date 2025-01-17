@@ -66,7 +66,7 @@ graph LR
 
 * Furthermore there are 4 different faiss index without training. [First](https://github.com/Minerva142/DenseRetrievalProject/blob/main/faiss_implementations/DirectBert_with_faiss_wot_training.py) one is BERT model and BERT tokenizer faiss, and the [second](https://github.com/Minerva142/DenseRetrievalProject/blob/main/faiss_implementations/faiss_just_using_bert_tokenizer.py) one is directly using BERT tokenizer. [Third](https://github.com/Minerva142/DenseRetrievalProject/blob/main/faiss_implementations/faiss_index_implementation_SBERT.py) it directly uses the pre-trained BERT sentence transformer as encoder. (Implemented but not trained and tested)
 
-* We also tested many different pre-trained models on the dataset. Tests were also performed with BM25 to provide a value comparison. Implementations are in kaggle notebooks  Below you can see the list of these tested models: 
+* We also tested many different pre-trained models on the dataset. Tests were also performed with BM25 to provide a value comparison. Implementations are in kaggle notebooks, and also provided under [here](). Below you can see the list of these tested models: 
   
 
 | Model Name                                 |
