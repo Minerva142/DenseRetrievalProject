@@ -30,6 +30,33 @@ approaches number tagged with the number of approach(as suffix) to implementatio
   | cross encoder loss       | BCEWithLogitsLoss                         |
   | optimizer                | AdamW                                    |
 
+```mermaid
+graph LR
+    Q[Query] --> BE[Bi-Encoder]
+    D[(Document Collection)] --> BE
+    BE --> R1[Top 100 Results]
+    R1 --> CE[Cross-Encoder]
+    Q --> CE
+    CE --> R2[Top 10 Results]
+
+    style BE fill:#a8e6cf
+    style CE fill:#ffd3b6
+    style Q fill:#dcedc1
+    style D fill:#dcedc1
+    style R1 fill:#fff
+    style R2 fill:#fff
+
+    subgraph Initial Retrieval
+    BE
+    end
+
+    subgraph Reranking
+    CE
+    end
+
+```
+  
+
 * [aprroach_3](https://github.com/Minerva142/DenseRetrievalProject/blob/main/model_implementations/ProjectBertDenseRetrieverMultiWotReRank_3.py) is training dense retriever with one positive and multiple negative documents for each query.
   
 * [aprroach_4](https://github.com/Minerva142/DenseRetrievalProject/blob/main/model_implementations/projectBetMultiPosAndNeg_4.py) is training dense retriever with one positive and multiple negative documents for each query. Actually, it is limited with 5 for short training. 
@@ -40,21 +67,76 @@ approaches number tagged with the number of approach(as suffix) to implementatio
     | loss function      | TripletMarginLoss      |
     | optimizer         | AdamW                  |
 
-* Furthermore there are 4 different faiss index without training. [First](https://github.com/Minerva142/DenseRetrievalProject/blob/main/faiss_implementations/DirectBert_with_faiss_wot_training.py) one is BERT model and BERT tokenizer faiss, and the [second](https://github.com/Minerva142/DenseRetrievalProject/blob/main/faiss_implementations/faiss_just_using_bert_tokenizer.py) one is directly using BERT tokenizer. [Third](https://github.com/Minerva142/DenseRetrievalProject/blob/main/faiss_implementations/faiss_index_implementation_SBERT.py) it directly uses the pre-trained BERT sentence transformer as encoder.[Fourth] () is using sentence transformer.You can see the implementation from file names.
+* Furthermore there are 4 different faiss index without training. [First](https://github.com/Minerva142/DenseRetrievalProject/blob/main/faiss_implementations/DirectBert_with_faiss_wot_training.py) one is BERT model and BERT tokenizer faiss, and the [second](https://github.com/Minerva142/DenseRetrievalProject/blob/main/faiss_implementations/faiss_just_using_bert_tokenizer.py) one is directly using BERT tokenizer. [Third](https://github.com/Minerva142/DenseRetrievalProject/blob/main/faiss_implementations/faiss_index_implementation_SBERT.py) it directly uses the pre-trained BERT sentence transformer as encoder. (Implemented but not trained and tested)
+
+* We also tested many different pre-trained models on the dataset. Tests were also performed with BM25 to provide a value comparison. Implementations are in kaggle notebooks  Below you can see the list of these tested models: 
+  
+
+| Model Name                                 |
+|--------------------------------------------|
+| BM25                                       |
+| all-mpnet-base-v2                          |
+| multi-qa-mpnet-base-cos-v1                 |
+| multi-qa-mpnet-base-dot-v1                 |
+| all-MiniLM-L6-v2                           |
+| multi-qa-MiniLM-L6-cos-v1                  |
+| all-MiniLM-L12-v2                          |
+| multi-qa-distilbert-cos-v1                 |
+| all-distilroberta-v1                       |
+| multi-qa-MiniLM-L6-dot-v1                  |
+| multi-qa-distilbert-dot-v1                 |
+| distiluse-base-multilingual-cased-v2       |
+| distiluse-base-multilingual-cased-v1       |
+| llama3_2_1b_instruct                       |
+
   
   
 
 ## Kaggle Implementations
-Other kaggle implementations can be found here:  
+example with llama:
 
 https://www.kaggle.com/code/eraygnlal/llama-dense-retrieval-inference/edit  
 https://www.kaggle.com/code/eraygnlal/llama-dense-retrieval-inference-trec-eval-added
 
 In these approaches, a pre-trained llama model was used as an encoder. A faiss index was then created and metric calculations were performed with the pytrec_eval library. The data used here was created with data formatter scripts available on the repository.
 
+Other models have been tested with this approach also.
+
 ## Faiss Index Implementations
 
 Faiss implementations can be found under this [directory](https://github.com/Minerva142/DenseRetrievalProject/tree/main/faiss_implementations). Each of them feeded with dataset which are provided with this [script](https://github.com/Minerva142/DenseRetrievalProject/blob/main/data_prepare_files/data_preperar_for_faiss_and_validation.py). Document number is limited with 50000 for testing purposes because encoding tooks a considirable time for each. Furthermore, using more document, in some cases, effects the result in negative manner. Used faiss index are IP and L2 based, we retrieve 10 documents for each query while testing. 100000 tests were also performed here, but not for every case due to time problems as mentioned above. 
+
+The whole set of documents was used to test the pre-trained models. The tests were completed on kaggle notebooks. The rest of the approaches are the same as mentioned before.
+
+```mermaid
+graph TD
+    subgraph Document Processing
+        D[(Documents)] --> T[Text Chunking]
+        T --> E[Embedding Model]
+        E --> V[Vector Embeddings]
+    end
+
+    subgraph FAISS Index
+        V --> I[FAISS Index]
+        I -->|Build Index| IX[(FAISS Index Storage)]
+    end
+
+    subgraph Search Process
+        Q[Query] --> QE[Query Embedding]
+        QE --> S[FAISS Similarity Search]
+        IX -->|Load Index| S
+        S --> R[Top-K Similar Documents]
+    end
+
+    style D fill:#a8e6cf
+    style Q fill:#a8e6cf
+    style IX fill:#ffd3b6
+    style I fill:#dcedc1
+    style S fill:#ff9aa2
+    style R fill:#b5ead7
+
+
+```
 
 
 
@@ -96,31 +178,55 @@ Used metrics are listed in below.
 | **recall@10**    | Recall at 10 (R@10) is the fraction of relevant documents retrieved among the top 10 results for a query.                                   |
 | **ndcg_cut@10**  | Normalized Discounted Cumulative Gain at 10 (NDCG@10) evaluates the ranking quality of the top 10 results by considering both relevance and position. |
 | **NDCG@10**      | Normalized Discounted Cumulative Gain (NDCG@10) measures the quality of ranking by taking into account the position and relevance of results, normalized for comparison across queries. |
-| **recip_rank**   | Reciprocal Rank (RR) is the inverse of the rank of the first relevant document, providing insight into how quickly the first relevant result appears. |
+| **MRR**          | Mean Reciprocal Rank (MRR) is the average of the reciprocal ranks of the first relevant document across all queries.                         |
+
 
 
 ## Comparisons
 
 calculated metrics, loss or other different values are listed [here](https://github.com/Minerva142/DenseRetrievalProject/blob/main/metrics_and_expreiments_result.docx) as word document.
 
-| Model & Query Type                                  | Test Document Size | MAP    | P@10   | Recall@5 | Recall@10 | NDCG@10 |
-|-----------------------------------------------------|--------------------|--------|--------|-----------|-----------|---------|
-| Normal BERT w/o training, title as query           | 50,000             | 0.0198 | 0.0613 | 0.0156    | 0.0562    | 0.0556  |
-| Normal BERT w/o fine-tuning, title as query        | 100,000            | 0.0047 | 0.0452 | 0.0011    | 0.0175    | 0.0336  |
-| Normal BERT fine-tuned, title as query                | 50,000             | 0.0553 | 0.0903 | 0.1017    | 0.1350    | 0.1258  |
-| SBERT, title as query                              | 50,000             | **0.1211** | **0.2065** | **0.1239** | **0.2379** | **0.2447** |
-| Reranker (cross-encoder & dual encoder), title     | 50,000             | 0.0023 | 0.0129 | -         | 0.0114    | 0.0094  |
-| Normal BERT fine-tuned, title as query                | 100,000            | 0.0410 | 0.1419 | 0.0404    | 0.0939    | 0.1443  |
-| Normal BERT fine-tuned, desc as query                 | 50,000             | 0.0796 | 0.1194 | 0.1161    | 0.1729    | 0.1556  |
-| Normal BERT w/o fine-tuning, desc as query            | 50,000             | 0.0079 | 0.0161 | 0.0054    | 0.0269    | 0.0165  |
-| Reranker (cross-encoder & dual encoder), desc      | 50,000             | 0.0073 | 0.0161 | -         | 0.0180    | 0.0203  |
-| Multi Pos and Negs BERT Train                      | 50,000             | 0.0390 | 0.0480 | 0.0590    | 0.0590    | 0.0760  |
 
+**BERT based with or w/o fine-tune results:**
+
+| Model & Query Type                                  | Parameters | Dimension | Test Document Size | MAP    | P@10   | Recall@5 | Recall@10 | NDCG@10 |
+|-----------------------------------------------------|------------|-----------|--------------------|--------|--------|-----------|-----------|---------|
+| Normal BERT w/o training, title as query           | 110M        | 768       | 50,000             | 0.0198 | 0.0613 | 0.0156    | 0.0562    | 0.0556  |
+| Normal BERT w/o fine-tuning, title as query        | 110M        | 768       | 100,000            | 0.0047 | 0.0452 | 0.0011    | 0.0175    | 0.0336  |
+| Normal BERT fine-tuned, title as query             | Fine-tuned | 768       | 50,000             | 0.0553 | 0.0903 | 0.1017    | 0.1350    | 0.1258  |
+| SBERT, title as query                              | Fine-tuned | 768       | 50,000             | **0.1211** | **0.2065** | **0.1239** | **0.2379** | **0.2447** |
+| Reranker (cross-encoder & dual encoder), title     | 110M + 22.5M        | 768       | 50,000             | 0.0023 | 0.0129 | -         | 0.0114    | 0.0094  |
+| Normal BERT fine-tuned, title as query             | Fine-tuned | 768       | 100,000            | 0.0410 | 0.1419 | 0.0404    | 0.0939    | 0.1443  |
+| Normal BERT fine-tuned, desc as query              | Fine-tuned | 768       | 50,000             | 0.0796 | 0.1194 | 0.1161    | 0.1729    | 0.1556  |
+| Normal BERT w/o fine-tuning, desc as query         | 110M        | 768       | 50,000             | 0.0079 | 0.0161 | 0.0054    | 0.0269    | 0.0165  |
+| Reranker (cross-encoder & dual encoder), desc      | 110M + 22.5M        | 768       | 50,000             | 0.0073 | 0.0161 | -         | 0.0180    | 0.0203  |
+| Multi Pos and Negs BERT Train                      | Fine-tuned | 768       | 50,000             | 0.0390 | 0.0480 | 0.0590    | 0.0590    | 0.0760  |
+
+
+
+**Already pre-trained models result:**
+
+| Model                             | Parameters | Dimensions | NDCG@10   | MAP      | MRR      | P@5     | P@10    | Recall@5 | Recall@10 |
+|-----------------------------------|------------|------------|-----------|----------|----------|---------|---------|----------|-----------|
+| BM25                              |            |            | 0.2123    | 0.1304   | 0.5210   | 0.3154  | 0.2530  | 0.1332   | 0.1830    |
+| all-mpnet-base-v2                 | 109M       | 768        | **0.2433**| **0.1471**| 0.5760   | 0.3490  | 0.2946  | **0.1513**| **0.2151**|
+| multi-qa-mpnet-base-cos-v1        | 109M       | 768        | 0.2415    | 0.1469   | 0.5724   | 0.3517  | **0.3007**| 0.1489   | 0.2113    |
+| multi-qa-mpnet-base-dot-v1        | 109M       | 768        | 0.2356    | 0.1411   | **0.5799**| **0.3584**| 0.2926  | 0.1511   | 0.2015    |
+| all-MiniLM-L6-v2                  | 22.7M      | 384        | 0.2281    | 0.1345   | 0.5750   | 0.3450  | 0.2738  | 0.1530   | 0.1973    |
+| multi-qa-MiniLM-L6-cos-v1         | 22.7M      | 384        | 0.2191    | 0.1304   | 0.5706   | 0.3383  | 0.2758  | 0.1369   | 0.1781    |
+| all-MiniLM-L12-v2                 | 33.4M      | 384        | 0.2135    | 0.1225   | 0.5739   | 0.3369  | 0.2711  | 0.1285   | 0.1762    |
+| multi-qa-distilbert-cos-v1        | 66.4M      | 768        | 0.2134    | 0.1217   | 0.5731   | 0.3329  | 0.2745  | 0.1261   | 0.1782    |
+| all-distilroberta-v1              | 82.1M      | 768        | 0.1985    | 0.1149   | 0.5057   | 0.3034  | 0.2470  | 0.1276   | 0.1752    |
+| multi-qa-MiniLM-L6-dot-v1         | 22.7M      | 384        | 0.1417    | 0.0782   | 0.4641   | 0.2282  | 0.1678  | 0.0853   | 0.1041    |
+| multi-qa-distilbert-dot-v1        | 66.4M      | 768        | 0.1366    | 0.0755   | 0.4056   | 0.2040  | 0.1631  | 0.0857   | 0.1164    |
+| distiluse-base-multilingual-cased-v2| 135M     | 512        | 0.1313    | 0.0715   | 0.3854   | 0.2215  | 0.1792  | 0.0765   | 0.1079    |
+| distiluse-base-multilingual-cased-v1| 135M     | 512        | 0.1157    | 0.0596   | 0.3699   | 0.2094  | 0.1765  | 0.0603   | 0.0885    |
+| llama3_2_1b_instruct              | 1.24B      | 2048       | 0.0046    | 0.0015   | 0.0347   | 0.0107  | 0.0060  | 0.0028   | 0.0028    |
 
 
 ## Key Result
 
-fine-tuned models did not show the expected performance increase. This could be due to an insufficiently deep fine-tuning process, or because the dataset is not large enough, or because we have errors in the approaches we tested empirically. We can say that the models that give the best results are the models that have been trained for this concept and whose parameters have been optimized for these cases. 
+fine-tuned models did not show the expected performance increase. This could be due to an insufficiently deep fine-tuning process, or because the dataset is not large enough, or because we have errors in the approaches we tested empirically. We can say that the models that give the best results are the models that have been trained for this concept and whose parameters have been optimized for these cases. While good performances were expected from large language models such as llama, the test results showed that llama was ineffective. We can say that this is because llama models are not a focused model from vector representation and vector representations are not at a sufficient level due to the predominance of attention. 
 
 ## Demo
 
