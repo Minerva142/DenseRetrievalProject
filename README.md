@@ -226,9 +226,9 @@ Here [SentenceTransformer](https://sbert.net/docs/cross_encoder/pretrained_model
 | llama3_2_1b_instruct              | 1.24B      | 2048       | 0.0046    | 0.0015   | 0.0347   | 0.0107  | 0.0060  | 0.0028   | 0.0028    |
 
 
-## Key Result
+## Conclusion
 
-fine-tuned models did not show the expected performance increase. This could be due to an insufficiently deep fine-tuning process, or because the dataset is not large enough, or because we have errors in the approaches we tested empirically. We can say that the models that give the best results are the SentenceTransformer (SBERT) models that have been pre-trained for semantic search. While good performances were expected from large language models such as llama, the test results showed that llama was ineffective. We can say that this is because llama models are not a designed for semantic search and vector representations are not at a sufficient level due to the predominance of attention. 
+fine-tuned models did not show the expected performance increase. This could be due to an insufficiently deep fine-tuning process, or because the dataset is not large enough, or because we have errors in the approaches we tested empirically. We dound that the models that give the best results are the SentenceTransformer (SBERT) models that have been pre-trained for semantic search on huge datasets. While good performances were expected from large language models such as llama, the test results showed that llama was ineffective. We suppose that this is because llama models are not designed for semantic search.
 
 ## Demo
 
