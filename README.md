@@ -131,10 +131,10 @@ graph TD
     style I fill:#dcedc1,color:#333333
     style S fill:#ff9aa2,color:#ffffff
     style R fill:#b5ead7,color:#333333
-    style T color:#ffffff
-    style E color:#ffffff
-    style V color:#ffffff
-    style QE color:#ffffff
+    style T color:black
+    style E color:black
+    style V color:black
+    style QE color:black
 
 
 ```
