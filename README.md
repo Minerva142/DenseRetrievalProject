@@ -1,6 +1,8 @@
 # DenseRetrievalProject
 
-Under [format_convertor directory](https://github.com/Minerva142/DenseRetrievalProject/tree/main/format_converter) , there are some python scripts to format data, formatted data is used by the **data_preparing_X.py** scripts which are under the [data_prepare_files](https://github.com/Minerva142/DenseRetrievalProject/tree/main/data_prepare_files) directory. These files provide the training and whole data for training parts. Befor using, you need to create all dataset and directories which are needed. Furthermore, you need to install all needed libraries.  
+Under [format_convertor directory](https://github.com/Minerva142/DenseRetrievalProject/tree/main/format_converter) , there are some python scripts to format data, formatted data is used by the **data_preparing_X.py** scripts which are under the [data_prepare_files](https://github.com/Minerva142/DenseRetrievalProject/tree/main/data_prepare_files) directory. These files provide the training and whole data for training parts. Befor using, you need to create all dataset and directories which are needed. Furthermore, you need to install all needed libraries. Also, there is no merged_document dataset on the repo, due to the file size. That dataset needs to be created using formatter scripts. If you need support, you can contact us via e-mail.
+
+(note : To run the demo, the faiss indexes need to be created, and the file I mentioned above needs to be there.)
 
 ## Approaches
 Rather then the second approach, all approaches are using BERT model and BERT encoders(for *.py files). Approximately 66 percent of the dataset was used for training, the rest was used for testing purposes to calculate metric values in faiss index implementations.
@@ -108,19 +110,18 @@ Faiss implementations can be found under this [directory](https://github.com/Min
 The whole set of documents was used to test the pre-trained models. The tests were completed on kaggle notebooks. The rest of the approaches are the same as mentioned before.
 
 ```mermaid
-graph TD
-    subgraph Document Processing
-        D[(Documents)] --> T[Text Chunking]
-        T --> E[Embedding Model]
+graph LR
+    subgraph Document_Processing
+        D[(Documents)] --> E[Embedding Model]
         E --> V[Vector Embeddings]
     end
 
-    subgraph FAISS Index
+    subgraph FAISS_Index
         V --> I[FAISS Index]
         I -->|Build Index| IX[(FAISS Index Storage)]
     end
 
-    subgraph Search Process
+    subgraph Search_Process
         Q[Query] --> QE[Query Embedding]
         QE --> S[FAISS Similarity Search]
         IX -->|Load Index| S
@@ -133,7 +134,6 @@ graph TD
     style I fill:#dcedc1,color:black
     style S fill:#ff9aa2,color:black
     style R fill:#b5ead7,color:black
-    style T color:black
     style E color:black
     style V color:black
     style QE color:black
