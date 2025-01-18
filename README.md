@@ -34,11 +34,13 @@ approaches number tagged with the number of approach(as suffix) to implementatio
 graph LR
     Q[Query] --> BE[Bi-Encoder]
     D[(Document Collection)] --> BE
-    BE --> R1[Top 100 Results]
+    BE --> F[Faiss search]
+    F --> R1[Top 100 Results]
     R1 --> CE[Cross-Encoder]
     Q --> CE
     CE --> R2[Top 10 Results]
     style BE fill:#a8e6cf,color:black
+    style F fill:#fff,color:black
     style CE fill:#ffd3b6,color:black
     style Q fill:#dcedc1,color:black
     style D fill:#dcedc1,color:black
