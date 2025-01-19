@@ -163,8 +163,8 @@ class SearchEvaluator:
             'map',
             'ndcg_cut.10',
             'P.10',
-            'recall.10',
-            'bpref'  # Binary Preference
+            'recall.10', 
+            'P.5'
         }
 
         # Initialize evaluator
