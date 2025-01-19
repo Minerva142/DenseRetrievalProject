@@ -183,7 +183,7 @@ class DenseRetrieverReRank:
                 'map',  # Mean Average Precision
                 'ndcg_cut.10',  # NDCG@10
                 'recall',  # Recall@100
-                'P.10'
+                'P.10', 'P.5'
             }
         )
 
