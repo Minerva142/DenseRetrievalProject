@@ -85,7 +85,7 @@ class SBERTRetriever:
         """Compute retrieval metrics using pytrec_eval"""
         evaluator = pytrec_eval.RelevanceEvaluator(
             qrels,
-            {'map', 'ndcg_cut.10', 'P.10', 'recall'}
+            {'map', 'ndcg_cut.10', 'P.10', 'recall', 'P.5'}
         )
         metrics = evaluator.evaluate(results)
 
@@ -106,7 +106,6 @@ class SBERTRetriever:
             k: int = 10,
             use_existing_index: bool = False
     ) -> Tuple[Dict, Dict]:
-        """Evaluate retrieval performance"""
         # Build or load index
         index, doc_ids = self.build_index(documents, use_existing_index)
 
