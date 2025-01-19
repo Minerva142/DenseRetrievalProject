@@ -65,7 +65,7 @@ def compute_metrics(qrels, results):
         qrels: dict of dict, ground truth relevance scores {qid: {doc_id: relevance_score}}
         results: dict of dict, retrieval results {qid: {doc_id: score}}
     """
-    evaluator = pytrec_eval.RelevanceEvaluator(qrels, {'map', 'ndcg_cut.10', 'P.10', 'recall'})
+    evaluator = pytrec_eval.RelevanceEvaluator(qrels, {'map', 'ndcg_cut.10', 'P.10', 'recall', 'P.5'})
     metrics = evaluator.evaluate(results)
     
     mean_metrics = defaultdict(float)
