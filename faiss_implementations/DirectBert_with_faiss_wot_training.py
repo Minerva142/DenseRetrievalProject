@@ -118,7 +118,7 @@ for query_id, query_vector in zip(query_keys,query_vectors):
 #print(retrieved_docs)
 
 # Evaluate using pytrec_eval
-evaluator = pytrec_eval.RelevanceEvaluator(qrels, {'map', 'ndcg_cut.10', 'recall', 'P.10'})
+evaluator = pytrec_eval.RelevanceEvaluator(qrels, {'map', 'ndcg_cut.10', 'recall', 'P.10', 'P.5'})
 results = evaluator.evaluate(retrieved_docs)
 
 metric_sums = {}
