@@ -112,7 +112,7 @@ class DenseRetrievalFAISS:
         # Initialize evaluator
         evaluator = pytrec_eval.RelevanceEvaluator(
             qrels, 
-            {'map', 'ndcg_cut.10', 'P.10', 'recall.100'}
+            {'map', 'ndcg_cut.10', 'P.10', 'recall.100', 'P.5'}
         )
         
         # Calculate metrics
